@@ -1,0 +1,66 @@
+-- 1. feladat: 
+/*Hozzon létre a lokális SQL szerveren TorpeTarna néven adatbázist! Az adatbázis
+alapértelmezett rendezési sorrendje a magyar szabályok szerinti legyen! Ha az Ön
+által választott SQL szervernél nem alapértelmezés az UTF-8 kódolás, akkor azt is
+állítsa be alapértelmezettnek az adatbázis létrehozásánál!*/
+
+CREATE DATABASE TorpeTarna 
+DEFAULT CHARACTER SET utf8 
+COLLATE utf8_hungarian_ci
+
+-- 3. feladat:
+Állítsa be a következő ábra szerint és a fenti leírás alapján az idegenkulcsokat a
+tarnak és a kihol táblákban!
+ 
+
+ALTER TABLE `tarnak` ADD INDEX( `kozet_id`);
+
+
+-- 4. feladat:
+Ki a legmagasabb törpe, és hány centiméter?
+
+SELECT torpek.nev,torpek.magassag FROM torpek ORDER BY torpek.magassag DESC LIMIT 1
+
+-- 5. feladat:
+Hány törpe dolgozott az elmúlt évben Gir Lodur aranybányáiban?
+
+SELECT COUNT(kihol.torpe_id) AS "Gir Lodur aranybányáiban dolgozók száma"
+FROM tarnak INNER JOIN kihol ON tarnak.id=kihol.tarna_id
+WHERE tarnak.nev="Gir Lodur"
+
+-- 6. feladat:
+A legjövedelmezőbb bányászati termék az arany. Melyik tárnákból termeltek ki
+aranyat a törpék, és mekkora mennyiséget?
+
+SELECT tarnak.nev,SUM(kihol.kitermelt_mennyiseg) AS "kitermelt mennyiség"
+FROM tarnak INNER JOIN kihol ON tarnak.id=kihol.tarna_id
+INNER JOIN kozetek ON kozetek.id=tarnak.kozet_id
+WHERE kozetek.nev="Arany"
+GROUP BY tarnak.nev
+ORDER BY SUM(kihol.kitermelt_mennyiseg) DESC
+
+-- 7. feladat:
+A Vasököl klán vezetője, Sarsi Duri úgy döntött, idén tavasszal házasodni kíván.
+Kiszemeltje a Vasököl klán legszorgosabb hölgye, aki a legtöbb kőzetet fejtette a
+bányákban. Ki ő?
+
+SELECT torpek.nev
+FROM torpek INNER JOIN kihol ON torpek.id=kihol.torpe_id
+WHERE torpek.klan="Vasököl" AND torpek.nem="N"
+GROUP BY torpek.nev
+ORDER BY SUM(kihol.kitermelt_mennyiseg) DESC
+LIMIT 1
+
+-- 8. feladat:
+Az év közepén új törpe érkezett a Vasököl klánba. Neve: Trad Morf, férfi, 136 cm
+magas és testsúlya 69 kg. Vegye fel az adatbázisba!
+
+INSERT INTO `torpek` (`id`, `nev`, `klan`, `nem`, `suly`, `magassag`) VALUES (NULL, 'Trad Morf', 'Vasököl', 'F', '69', '136');
+
+-- 9. feladat:
+Trad Morf szorgos törpe, Gir Lodur-ban 43 kg aranyat bányászott, Moldirth-ban
+pedig 28 kg kőzetet termelt ki. Vegye fel az adatokat a megfelelő táblába!
+Megoldása több pontot ér, ha az azonosítókat lekérdezések segítségével határozza
+meg.
+
+INSERT INTO `kihol` (`torpe_id`, `tarna_id`, `kitermelt_mennyiseg`) VALUES (31, 1, 43),(31, 3, 28) 
